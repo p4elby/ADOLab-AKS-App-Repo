@@ -26,9 +26,12 @@ namespace DotNetCoreSqlDb
         {
             // Add framework services.
             services.AddMvc();
-
-            services.AddDbContext<MyDatabaseContext>(options =>
-                    options.UseSqlite("Data Source=localdatabase.db"));
+            if(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
+                services.AddDbContext<MyDatabaseContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("MydbConnection")));
+            else 
+                services.AddDbContext<MyDatabaseContext>(options =>
+                    options.UseSqlite("Data source=MvcMovie.db"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
