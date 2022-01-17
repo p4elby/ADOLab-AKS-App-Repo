@@ -67,14 +67,15 @@ stages:
               PathtoPublish: 'C:\Artifact_ToDo\'
               ArtifactName: dotnet
             condition: succeededOrFailed()
-  - stage: Deploy_$(env_deploy)
+  - stage: DeployEnv
     condition: in(stageDependencies.Build.Build.result, 'Succeeded')
     displayName: Deploy_$(env_deploy)
     variables:
       - group: ToDo_App_Vars
       - group: $(env_deploy)-TF-VARS
     jobs:
-      - job: Deploy_$(env_deploy)
+      - job: DeployEnv
+        displayName: Deploy_job_$(env_deploy)
         pool:
           name: ARTSEM_KAPUSTSIN
           demands: sqlpackage 
