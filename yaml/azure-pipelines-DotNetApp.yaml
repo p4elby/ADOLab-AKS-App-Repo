@@ -36,6 +36,11 @@ stages:
               SourceFolder: 'C:\sql'
               Contents: '**.zip'
               TargetFolder: '$(System.DefaultWorkingDirectory)/sql/DbMigration.sql'
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Artifact SQL'
+            inputs:
+              PathtoPublish: '$(System.DefaultWorkingDirectory)/sql/DbMigration.sql'
+              ArtifactName: sql
 
           - task: DotNetCoreCLI@2
             displayName: Restore
@@ -69,6 +74,13 @@ stages:
               SourceFolder: '$(build.artifactstagingdirectory)'
               Contents: '**.zip'
               TargetFolder: 'C:\Artifact_ToDo'
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Artifact dotnet'
+            inputs:
+              PathtoPublish: '$(build.artifactstagingdirectory)'
+              ArtifactName: dotnet
+            condition: succeededOrFailed()
+
   - stage: DeployEnv
     condition: in(stageDependencies.Build.Build.result, 'Succeeded')
     displayName: Deploy_DEV
