@@ -72,7 +72,9 @@ stages:
     displayName: Deploy_$(env_deploy)
     variables:
       - group: ToDo_App_Vars
-      - group: $(env_deploy)-TF-VARS
+      - group: DEV-TF-VARS
+      - name: ASPNETCORE_ENVIRONMENT
+        value: Production
     jobs:
       - job: DeployEnv
         displayName: Deploy_job_$(env_deploy)
