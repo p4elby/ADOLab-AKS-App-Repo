@@ -9,9 +9,6 @@ trigger:
 stages:
   - stage: Build
     displayName: Build
-    variables:
-      - group: ToDo_App_Vars
-      - group: DEV-TF-VARS
     jobs:
       - job: Build  
         pool: 
@@ -30,11 +27,12 @@ stages:
               custom: ef
               arguments: 'migrations script -p DotNetCoreSqlDb.csproj -o sql\DbMigration.sql'
 
-          - task: PublishBuildArtifacts@1
-            displayName: 'Publish Artifact SQL'
+          - task: CopyFiles@2
+            displayName: 'Copy Files'
             inputs:
-              PathtoPublish: 'C:\sql\DbMigration.sql'
-              ArtifactName: sql
+              SourceFolder: 'C:\sql'
+              Contents: '**.zip'
+              TargetFolder: '$(System.DefaultWorkingDirectory)/sql/DbMigration.sql'
 
           - task: DotNetCoreCLI@2
             displayName: Restore
@@ -62,12 +60,12 @@ stages:
               arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
               zipAfterPublish: True
 
-          - task: PublishBuildArtifacts@1
-            displayName: 'Publish Artifact dotnet'
+          - task: CopyFiles@2
+            displayName: 'Copy Files'
             inputs:
-              PathtoPublish: 'C:\Artifact_ToDo\'
-              ArtifactName: dotnet
-            condition: succeededOrFailed()
+              SourceFolder: '$(build.artifactstagingdirectory)'
+              Contents: '**.zip'
+              TargetFolder: 'C:\Artifact_ToDo'
   - stage: DeployEnv
     condition: in(stageDependencies.Build.Build.result, 'Succeeded')
     displayName: Deploy_DEV
