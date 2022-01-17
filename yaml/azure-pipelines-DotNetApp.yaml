@@ -2,8 +2,6 @@ name: ADO Lab-CI-CD-ToDoApp $(rev:r)
 variables:
   - name: ASPNETCORE_ENVIRONMENT
     value: Production 
-  - name: env_deploy
-    value: DEV
 trigger:
   branches:
     include:
@@ -69,7 +67,7 @@ stages:
             condition: succeededOrFailed()
   - stage: DeployEnv
     condition: in(stageDependencies.Build.Build.result, 'Succeeded')
-    displayName: Deploy_$(env_deploy)
+    displayName: Deploy_DEV
     variables:
       - group: ToDo_App_Vars
       - group: DEV-TF-VARS
@@ -77,7 +75,7 @@ stages:
         value: Production
     jobs:
       - job: DeployEnv
-        displayName: Deploy_job_$(env_deploy)
+        displayName: Deploy_job_DEV
         pool:
           name: ARTSEM_KAPUSTSIN
           demands: sqlpackage 
