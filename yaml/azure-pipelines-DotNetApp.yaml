@@ -1,0 +1,97 @@
+name: ADO Lab-CI-CD-ToDoApp $(rev:r)
+variables:
+  - name: ASPNETCORE_ENVIRONMENT
+    value: Production 
+  - name: env_deploy
+    value: DEV
+trigger:
+  branches:
+    include:
+      - main
+stages:
+  - stage: Build
+    displayName: Build
+    jobs:
+      - job: Build  
+        pool: 
+          name: ARTSEM_KAPUSTSIN
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET Core sdk '
+            inputs:
+              version: '$(net_core_sdk_version)'
+              installationPath: '$(Agent.ToolsDirectory)\dotnet'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Migrations script'
+            inputs:
+              command: custom
+              custom: ef
+              arguments: 'migrations script -p DotNetCoreSqlDb.csproj -o sql\DbMigration.sql'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Artifact SQL'
+            inputs:
+              PathtoPublish: 'C:\sql\DbMigration.sql'
+              ArtifactName: sql
+
+          - task: DotNetCoreCLI@2
+            displayName: Restore
+            inputs:
+              command: restore
+              projects: '$(Parameters.RestoreBuildProjects)'
+
+          - task: DotNetCoreCLI@2
+            displayName: Build
+            inputs:
+              projects: '$(Parameters.RestoreBuildProjects)'
+              arguments: '--configuration $(BuildConfiguration)'
+
+          - task: DotNetCoreCLI@2
+            displayName: Test
+            inputs:
+              command: test
+              projects: '$(Parameters.TestProjects)'
+              arguments: '--configuration $(BuildConfiguration)'
+
+          - task: DotNetCoreCLI@2
+            displayName: Publish
+            inputs:
+              command: publish
+              arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+              zipAfterPublish: True
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Artifact dotnet'
+            inputs:
+              PathtoPublish: 'C:\Artifact_ToDo\'
+              ArtifactName: dotnet
+            condition: succeededOrFailed()
+  - stage: Deploy_$(env_deploy)
+    condition: in(stageDependencies.Build.Build.result, 'Succeeded')
+    displayName: Deploy_$(env_deploy)
+    variables:
+      - group: ToDo_App_Vars
+      - group: $(env_deploy)-TF-VARS
+    jobs:
+      - job: Deploy_$(env_deploy)
+        pool:
+          name: ARTSEM_KAPUSTSIN
+          demands: sqlpackage 
+        steps:
+          - task: SqlAzureDacpacDeployment@1
+            displayName: 'Azure SQL'
+            inputs:
+              azureSubscription: 'Visual Studio Professional Subscription (909760ee-feaf-46f3-80d2-6eb7d0ce640c)'
+              ServerName: '$(azure_sql_name)'
+              DatabaseName: 'sqldb-$(TF_VAR_RESOURCE_NAME_PREFIX)-$(TF_VAR_LOCATION)-$(TF_VAR_ENV)'
+              SqlUsername: '$(TF_VAR_SQL_SERVER_ADMINISTRATOR_LOGIN)'
+              SqlPassword: '$(SQL_SERVER_ADMIN_PASS)'
+              deployType: SqlTask
+              SqlFile: 'C:\sql\DbMigration.sql'
+          - task: AzureRmWebAppDeployment@4
+            displayName: 'Deploy App'
+            inputs:
+              azureSubscription: 'Visual Studio Professional Subscription (909760ee-feaf-46f3-80d2-6eb7d0ce640c)'
+              WebAppName: 'app-$(TF_VAR_RESOURCE_NAME_PREFIX)-$(TF_VAR_LOCATION)-$(TF_VAR_ENV)'
+              packageForLinux: 'C:\Artifact_ToDo\**\*.zip'                      
