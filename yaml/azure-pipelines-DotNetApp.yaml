@@ -9,6 +9,9 @@ trigger:
 stages:
   - stage: Build
     displayName: Build
+    variables:
+      - group: ToDo_App_Vars
+      - group: DEV-TF-VARS
     jobs:
       - job: Build  
         pool: 
