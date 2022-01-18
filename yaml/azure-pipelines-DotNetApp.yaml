@@ -37,9 +37,9 @@ stages:
           - task: CopyFiles@2
             displayName: 'Copy Files'
             inputs:
-              SourceFolder: 'C:\sql'
+              SourceFolder: '$(System.DefaultWorkingDirectory)/sql/DbMigration.sql'
               Contents: '**.zip'
-              TargetFolder: '$(System.DefaultWorkingDirectory)/sql/DbMigration.sql'
+              TargetFolder: 'C:\sql'
 
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Artifact SQL'
