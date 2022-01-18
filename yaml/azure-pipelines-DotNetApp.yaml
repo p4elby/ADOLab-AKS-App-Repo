@@ -36,6 +36,7 @@ stages:
               SourceFolder: 'C:\sql'
               Contents: '**.zip'
               TargetFolder: '$(System.DefaultWorkingDirectory)/sql/DbMigration.sql'
+
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Artifact SQL'
             inputs:
@@ -74,6 +75,7 @@ stages:
               SourceFolder: '$(build.artifactstagingdirectory)'
               Contents: '**.zip'
               TargetFolder: 'C:\Artifact_ToDo'
+
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Artifact dotnet'
             inputs:
