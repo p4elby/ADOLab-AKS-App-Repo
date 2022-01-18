@@ -43,8 +43,8 @@ stages:
           - task: CopyFiles@2
             displayName: 'Copy Files'
             inputs:
-              SourceFolder: '$(Build.SourcesDirectory)/sql/DbMigration.sql'
-              Contents: '**.zip'
+              SourceFolder: '$(Build.SourcesDirectory)/sql'
+              Contents: '**.sql'
               TargetFolder: 'C:\sql'
 
           - task: DotNetCoreCLI@2
