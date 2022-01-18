@@ -88,7 +88,7 @@ stages:
             condition: succeededOrFailed()
 
   - stage: DeployEnv
-    condition: in(stageDependencies.Build.Build.result, 'Succeeded')
+    dependsOn: Build
     displayName: Deploy_DEV
     variables:
       - group: ToDo_App_Vars
