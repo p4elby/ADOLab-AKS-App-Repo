@@ -34,18 +34,18 @@ stages:
               custom: ef
               arguments: 'migrations script -p DotNetCoreSqlDb.csproj -o sql\DbMigration.sql'
 
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Artifact SQL'
+            inputs:
+              PathtoPublish: '$(System.DefaultWorkingDirectory)/sql/DbMigration.sql'
+              ArtifactName: sql
+          
           - task: CopyFiles@2
             displayName: 'Copy Files'
             inputs:
               SourceFolder: '$(System.DefaultWorkingDirectory)/sql/DbMigration.sql'
               Contents: '**.zip'
               TargetFolder: 'C:\sql'
-
-          - task: PublishBuildArtifacts@1
-            displayName: 'Publish Artifact SQL'
-            inputs:
-              PathtoPublish: '$(System.DefaultWorkingDirectory)/sql/DbMigration.sql'
-              ArtifactName: sql
 
           - task: DotNetCoreCLI@2
             displayName: Build
