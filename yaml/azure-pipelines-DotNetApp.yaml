@@ -52,6 +52,7 @@ stages:
             inputs:
               command: restore
               projects: '$(Parameters.RestoreBuildProjects)'
+              workingDirectory: '$(System.DefaultWorkingDirectory)'
 
           - task: DotNetCoreCLI@2
             displayName: Build
