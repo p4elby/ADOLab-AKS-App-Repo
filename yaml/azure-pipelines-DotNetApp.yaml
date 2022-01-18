@@ -2,6 +2,10 @@ name: ADO Lab-CI-CD-ToDoApp $(rev:r)
 variables:
   - name: ASPNETCORE_ENVIRONMENT
     value: Production 
+  - name: BuildConfiguration
+    value: Release
+  - name: BuildPlatform
+    value: 'any cpu'
 trigger:
   branches:
     include:
@@ -42,6 +46,13 @@ stages:
             inputs:
               PathtoPublish: '$(System.DefaultWorkingDirectory)/sql/DbMigration.sql'
               ArtifactName: sql
+
+          - task: DotNetCoreCLI@2
+            displayName: Restore
+            inputs:
+              command: restore
+              projects: '$(Parameters.RestoreBuildProjects)'
+
           - task: DotNetCoreCLI@2
             displayName: Build
             inputs:
